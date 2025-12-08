@@ -14,11 +14,11 @@ class PaymentGatewayFactory
             return null;
         }
 
+        $class = $config['class'];
+        if (!class_exists($class)) {
+            return null;
+        }
 
-        return match ($method) {
-            'credit_card' => new CreditCardGateway($config),
-            'paypal' => new PaypalGateway($config),
-            default => null
-        };
+        return new $class($config);
     }
 }

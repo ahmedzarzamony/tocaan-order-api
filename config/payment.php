@@ -16,10 +16,12 @@ return [
 
     'gateways' => [
         'credit_card' => [
+            'class' => App\Services\Payment\CreditCardGateway::class,
             'api_key' => env('CREDIT_CARD_API_KEY', ''),
             'api_secret' => env('CREDIT_CARD_API_SECRET', ''),
         ],
         'paypal' => [
+            'class' => App\Services\Payment\PaypalGateway::class,
             'client_id' => env('PAYPAL_CLIENT_ID', ''),
             'client_secret' => env('PAYPAL_CLIENT_SECRET', ''),
         ],

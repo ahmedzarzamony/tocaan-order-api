@@ -30,10 +30,10 @@ class OrderPaymentTest extends TestCase
         $this->assertDatabaseCount('order_items', 2);
     }
 
-    public function test_cannot_pay_pending_order()
+    public function test_cannot_pay_confirmed_order()
     {
         $user = User::factory()->create();
-        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'pending']);
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'confirmed']);
 
         $response = $this->actingAs($user, 'api')
             ->postJson('api/payments', [
@@ -45,10 +45,30 @@ class OrderPaymentTest extends TestCase
                  ->assertJson(['message' => 'Payments can only be processed for confirmed orders.']);
     }
 
+    public function test_can_pay_pending_order()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'pending']);
+
+        $response = $this->actingAs($user, 'api')
+            ->postJson('api/payments', [
+                'order_id' => $order->id,
+                'payment_method' => 'credit_card',
+            ]);
+
+        $response->assertStatus(200)
+                 ->assertJson(['message' => 'Payment processed successfully.']);
+
+        $this->assertDatabaseHas('payments', [
+            'order_id' => $order->id,
+            'status' => 'successful',
+        ]);
+    }
+
     public function test_cannot_pay_order_twice()
     {
         $user = User::factory()->create();    
-        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'confirmed']);
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'pending']);
 
         // دفع أول مرة
         $this->actingAs($user, 'api')
@@ -66,26 +86,6 @@ class OrderPaymentTest extends TestCase
 
         $response->assertStatus(403)
                  ->assertJson(['message' => 'Order has already been paid.']);
-    }
-
-    public function test_can_pay_confirmed_order()
-    {
-        $user = User::factory()->create();
-        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'confirmed']);
-
-        $response = $this->actingAs($user, 'api')
-            ->postJson('api/payments', [
-                'order_id' => $order->id,
-                'payment_method' => 'credit_card',
-            ]);
-
-        $response->assertStatus(200)
-                 ->assertJson(['message' => 'Payment processed successfully.']);
-
-        $this->assertDatabaseHas('payments', [
-            'order_id' => $order->id,
-            'status' => 'successful',
-        ]);
     }
 
 

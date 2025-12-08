@@ -41,7 +41,7 @@ class PaymentController extends Controller
             ], 403);
         }
 
-        if ($order->status !== 'confirmed') {
+        if ($order->status !== 'pending') {
             return response()->json([
                 'message' => 'Payments can only be processed for confirmed orders.'
             ], 403);
