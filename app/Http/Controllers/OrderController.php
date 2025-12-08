@@ -18,12 +18,12 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $userId = $request->user()->id;
-        $orders = Order::with('items')
-        ->where('user_id', $userId)
-        ->when($request->filled('status') && in_array($request->status, ['pending', 'confirmed', 'cancelled']), function ($query) use ($request) {
-            $query->where('status', $request->status);
-        })
-        ->paginate(10);
+        $orders = Order::with('items', 'payments')
+            ->where('user_id', $userId)
+            ->when($request->filled('status') && in_array($request->status, ['pending', 'confirmed', 'cancelled']), function ($query) use ($request) {
+                $query->where('status', $request->status);
+            })
+            ->paginate(10);
         return OrderResource::collection($orders);
     }
 
@@ -39,7 +39,7 @@ class OrderController extends Controller
             'items.*.price' => 'required|numeric|min:0',
         ]);
 
-        
+
         $order = DB::transaction(function () use ($request) {
             $userId = $request->user()->id;
             $total = collect($request->items)->sum(fn($item) => $item['quantity'] * $item['price']);
@@ -59,7 +59,7 @@ class OrderController extends Controller
         });
 
         return Response::json([
-            'message' => 'Order created successfully',  
+            'message' => 'Order created successfully',
             'order' => new OrderResource($order)
         ], 201);
     }
@@ -78,7 +78,79 @@ class OrderController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        
+        $order = Order::with('items')->findOrFail($id);
+        if ($order->payments()->exists()) {
+            return Response::json([
+                'message' => 'Cannot update order with existing payments.'
+            ], 403);
+        }
+
+        $request->validate([
+            'items' => 'required|array|min:1', 
+            'items.*.product_name' => 'required|string|max:255', 
+            'items.*.quantity' => 'required|integer|min:1', 
+            'items.*.price' => 'required|numeric|min:0', 
+            'items.*.id' => 'nullable|exists:order_items,id'
+        ]);
+
+        DB::transaction(function () use ($request, $order) {
+
+            $existingItemIds = $order->items()->pluck('id')->toArray(); 
+            $requestItemIds = collect($request->items)->pluck('id')->filter()->toArray();
+            $itemsToDelete = array_diff($existingItemIds, $requestItemIds); 
+            if (!empty($itemsToDelete)) { 
+                $order->items()->whereIn('id', $itemsToDelete)->delete(); 
+            }
+
+            $newItems = [];
+
+            foreach ($request->items as $itemData) {
+                if (isset($itemData['id'])) {
+                    $orderItem = $order->items->firstWhere('id', $itemData['id']);
+
+                    if ($orderItem) {
+                        $newValues = [
+                            'product_name' => $itemData['product_name'],
+                            'quantity' => $itemData['quantity'],
+                            'price' => $itemData['price'],
+                        ];
+
+                        $orderItem->fill($newValues);
+
+                        if ($orderItem->isDirty()) {
+                            $orderItem->save();
+                        }
+                    }
+
+                } else {
+                    $newItems[] = [
+                        'product_name' => $itemData['product_name'],
+                        'quantity' => $itemData['quantity'],
+                        'price' => $itemData['price'],
+                    ];
+                }
+            }
+
+            if (!empty($newItems)) {
+                $order->items()->createMany($newItems);
+            }
+
+            
+            
+            
+        });
+        $order->load('items');
+        $total = $order->items->sum(fn($i) => $i->quantity * $i->price);
+        $order->total = $total;
+        $order->save();
+         // refresh the items relationship
+
+        return Response::json([
+            'message' => 'Order updated successfully',
+            'order' => new OrderResource($order)
+        ], 200);
+
+
     }
 
     /**
@@ -87,7 +159,12 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         $order = Order::findOrFail($id);
+        if ($order->payments()->exists()) {
+            return Response::json([
+                'message' => 'Cannot delete order with existing payments.'
+            ], 403);
+        }
         $order->delete();
-        return response()->json(['message' => 'Order deleted successfully'], 200);
+        return Response::json(['message' => 'Order deleted successfully'], 200);
     }
 }
