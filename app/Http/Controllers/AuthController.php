@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Response;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class AuthController extends Controller
@@ -28,31 +29,30 @@ class AuthController extends Controller
         try {
             $token = JWTAuth::fromUser($user);
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Could not create token'], 500);
+            return Response::json(['error' => 'Could not create token'], 500);
         }
 
-        return response()->json([
+        return Response::json([
             'token' => $token,
             'user' => $user,
         ], 201);
     }
 
-    public function login(Request $request)
-    {
+    public function login(Request $request) {
         $credentials = $request->only('email', 'password');
 
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'Invalid credentials'], 401);
+                return Response::json(['error' => 'Invalid credentials'], 401);
             }
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Could not create token'], 500);
+            return Response::json(['error' => 'Could not create token'], 500);
         }
 
-        return response()->json([
+        return Response::json([
             'token' => $token,
             'expires_in' => auth('api')->factory()->getTTL() * 60,
-        ]);
+        ], 200);
     }
 
     public function refresh()
@@ -60,13 +60,13 @@ class AuthController extends Controller
         try {
             $newToken = auth()->refresh();
 
-            return response()->json([
+            return Response::json([
                 'message' => 'Token refreshed successfully',
                 'token'   => $newToken
             ]);
             
         } catch (\Exception $e) {
-            return response()->json([
+            return Response::json([
                 'error' => 'Token is invalid or expired'
             ], 401);
         }
@@ -77,10 +77,10 @@ class AuthController extends Controller
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Failed to logout, please try again'], 500);
+            return Response::json(['error' => 'Failed to logout, please try again'], 500);
         }
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return Response::json(['message' => 'Successfully logged out']);
     }
 
 }

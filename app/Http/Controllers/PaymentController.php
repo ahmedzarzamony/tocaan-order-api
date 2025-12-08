@@ -33,6 +33,14 @@ class PaymentController extends Controller
 
         $order = Order::findOrFail($request->order_id);
 
+        $lastPayment = $order->latestPayment;
+
+        if ($lastPayment && $lastPayment->status === 'successful') {
+            return response()->json([
+                'message' => 'Order has already been paid.'
+            ], 403);
+        }
+
         if ($order->status !== 'confirmed') {
             return response()->json([
                 'message' => 'Payments can only be processed for confirmed orders.'
