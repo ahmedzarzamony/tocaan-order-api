@@ -1,0 +1,568 @@
+{
+	"info": {
+		"_postman_id": "b632ace1-355b-49cc-92f7-88a9d91a2130",
+		"name": "Tocaan",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5181729"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/auth/register?name=Ahmed Mohammed&email=test@test.com&password=@54321",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Ahmed Mohammed"
+								},
+								{
+									"key": "email",
+									"value": "test@test.com"
+								},
+								{
+									"key": "password",
+									"value": "@54321"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/auth/login?email=test@test.com&password=@54321",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "test@test.com"
+								},
+								{
+									"key": "password",
+									"value": "@54321"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/auth/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/auth/refresh-token",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "items[0][product_name]",
+									"value": "Motherboard",
+									"type": "text"
+								},
+								{
+									"key": "items[0][quantity]",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "items[0][price]",
+									"value": "6000",
+									"type": "text"
+								},
+								{
+									"key": "items[1][product_name]",
+									"value": "GPU Card",
+									"type": "text"
+								},
+								{
+									"key": "items[1][quantity]",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "items[1][price]",
+									"value": "8000",
+									"type": "text"
+								},
+								{
+									"key": "items[2][product_name]",
+									"value": "RAM 8GB",
+									"type": "text"
+								},
+								{
+									"key": "items[2][quantity]",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "items[2][price]",
+									"value": "3500",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/orders",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "items[0][product_name]",
+									"value": "Motherboard",
+									"type": "text"
+								},
+								{
+									"key": "items[0][quantity]",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "items[0][price]",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "items[1][product_name]",
+									"value": "GPU Card",
+									"type": "text"
+								},
+								{
+									"key": "items[1][quantity]",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "items[1][price]",
+									"value": "1000",
+									"type": "text"
+								},
+								{
+									"key": "items[2][product_name]",
+									"value": "RAM 8GB",
+									"type": "text"
+								},
+								{
+									"key": "items[2][quantity]",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "items[2][price]",
+									"value": "2000",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/orders/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/orders/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/orders/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/orders",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "Get Payments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/payments",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pay for an Order",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "order_id",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "payment_method",
+									"value": "paypal",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/payments",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	]
+}
