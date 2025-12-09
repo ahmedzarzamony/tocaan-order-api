@@ -5,12 +5,20 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class OrderPaymentTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_authentication_required()
+    {
+        $response = $this->postJson('/api/orders', []);
+
+        $response->assertStatus(401);
+    }
     
     public function test_can_create_order_with_items()
     {
@@ -28,6 +36,56 @@ class OrderPaymentTest extends TestCase
 
         $this->assertDatabaseHas('orders', ['user_id' => $user->id, 'total' => 25]);
         $this->assertDatabaseCount('order_items', 2);
+    }
+
+    public function test_can_update_order()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user, 'api')->putJson("/api/orders/{$order->id}", [
+            'items' => [
+                ['product_name' => 'New Item', 'quantity' => 1, 'price' => 50]
+            ]
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJson(['message' => 'Order updated successfully']);
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $order->id,
+            'total' => 50,
+        ]);
+    }
+
+    public function test_can_delete_order()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user, 'api')->deleteJson("/api/orders/{$order->id}");
+
+        $response->assertStatus(200)
+                 ->assertJson(['message' => 'Order deleted successfully']);
+
+        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+    }
+
+    public function test_cannot_delete_order_with_payments()
+    {
+        $user = User::factory()->create();
+        $order = Order::factory()->create(['user_id' => $user->id]);
+
+        Payment::factory()->create([
+            'order_id' => $order->id,
+            'status'   => 'successful'
+        ]);
+
+        $response = $this->actingAs($user, 'api')
+            ->deleteJson("/api/orders/{$order->id}");
+
+        $response->assertStatus(403)
+                 ->assertJson(['message' => 'Cannot delete order with existing payments.']);
     }
 
     public function test_cannot_pay_confirmed_order()
