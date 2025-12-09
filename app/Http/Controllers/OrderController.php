@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\OrderRequest;
 use App\Http\Resources\OrderResource;
 use Illuminate\Support\Facades\Response;
 
@@ -30,15 +31,8 @@ class OrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(OrderRequest $request)
     {
-        $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.product_name' => 'required|string|max:255',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-        ]);
-
 
         $order = DB::transaction(function () use ($request) {
             $userId = $request->user()->id;
@@ -76,7 +70,7 @@ class OrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(OrderRequest $request, string $id)
     {
         $order = Order::with('items')->findOrFail($id);
         if ($order->payments()->exists()) {
@@ -84,14 +78,6 @@ class OrderController extends Controller
                 'message' => 'Cannot update order with existing payments.'
             ], 403);
         }
-
-        $request->validate([
-            'items' => 'required|array|min:1', 
-            'items.*.product_name' => 'required|string|max:255', 
-            'items.*.quantity' => 'required|integer|min:1', 
-            'items.*.price' => 'required|numeric|min:0', 
-            'items.*.id' => 'nullable|exists:order_items,id'
-        ]);
 
         DB::transaction(function () use ($request, $order) {
 

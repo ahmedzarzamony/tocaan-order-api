@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\PayOrderRequest;
 use App\Http\Resources\PaymentResource;
 use Illuminate\Support\Facades\Response;
 use App\Services\Payment\PaymentGatewayFactory;
@@ -24,12 +25,8 @@ class PaymentController extends Controller
         return PaymentResource::collection($payments);
     }
 
-    public function payOrder(Request $request)
+    public function payOrder(PayOrderRequest $request)
     {
-        $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'payment_method' => 'required|in:credit_card,paypal',
-        ]);
 
         $order = Order::findOrFail($request->order_id);
 
