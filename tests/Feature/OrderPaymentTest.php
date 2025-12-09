@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Order;
 use App\Models\Payment;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class OrderPaymentTest extends TestCase
 {
@@ -19,7 +18,7 @@ class OrderPaymentTest extends TestCase
 
         $response->assertStatus(401);
     }
-    
+
     public function test_can_create_order_with_items()
     {
         $user = User::factory()->create();
@@ -32,7 +31,7 @@ class OrderPaymentTest extends TestCase
             ]);
 
         $response->assertStatus(201)
-                 ->assertJson(['message' => 'Order created successfully']);
+            ->assertJson(['message' => 'Order created successfully']);
 
         $this->assertDatabaseHas('orders', ['user_id' => $user->id, 'total' => 25]);
         $this->assertDatabaseCount('order_items', 2);
@@ -45,12 +44,12 @@ class OrderPaymentTest extends TestCase
 
         $response = $this->actingAs($user, 'api')->putJson("/api/orders/{$order->id}", [
             'items' => [
-                ['product_name' => 'New Item', 'quantity' => 1, 'price' => 50]
-            ]
+                ['product_name' => 'New Item', 'quantity' => 1, 'price' => 50],
+            ],
         ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['message' => 'Order updated successfully']);
+            ->assertJson(['message' => 'Order updated successfully']);
 
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
@@ -66,7 +65,7 @@ class OrderPaymentTest extends TestCase
         $response = $this->actingAs($user, 'api')->deleteJson("/api/orders/{$order->id}");
 
         $response->assertStatus(200)
-                 ->assertJson(['message' => 'Order deleted successfully']);
+            ->assertJson(['message' => 'Order deleted successfully']);
 
         $this->assertDatabaseMissing('orders', ['id' => $order->id]);
     }
@@ -78,14 +77,14 @@ class OrderPaymentTest extends TestCase
 
         Payment::factory()->create([
             'order_id' => $order->id,
-            'status'   => 'successful'
+            'status' => 'successful',
         ]);
 
         $response = $this->actingAs($user, 'api')
             ->deleteJson("/api/orders/{$order->id}");
 
         $response->assertStatus(403)
-                 ->assertJson(['message' => 'Cannot delete order with existing payments.']);
+            ->assertJson(['message' => 'Cannot delete order with existing payments.']);
     }
 
     public function test_cannot_pay_confirmed_order()
@@ -97,10 +96,10 @@ class OrderPaymentTest extends TestCase
             ->postJson('api/payments', [
                 'order_id' => $order->id,
                 'payment_method' => 'credit_card',
-            ]); 
+            ]);
 
         $response->assertStatus(403)
-                 ->assertJson(['message' => 'Payments can only be processed for confirmed orders.']);
+            ->assertJson(['message' => 'Payments can only be processed for confirmed orders.']);
     }
 
     public function test_can_pay_pending_order()
@@ -115,7 +114,7 @@ class OrderPaymentTest extends TestCase
             ]);
 
         $response->assertStatus(200)
-                 ->assertJson(['message' => 'Payment processed successfully.']);
+            ->assertJson(['message' => 'Payment processed successfully.']);
 
         $this->assertDatabaseHas('payments', [
             'order_id' => $order->id,
@@ -125,15 +124,15 @@ class OrderPaymentTest extends TestCase
 
     public function test_cannot_pay_order_twice()
     {
-        $user = User::factory()->create();    
+        $user = User::factory()->create();
         $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'pending']);
 
         // دفع أول مرة
         $this->actingAs($user, 'api')
-             ->postJson('api/payments', [
-                 'order_id' => $order->id,
-                 'payment_method' => 'credit_card',
-             ]);
+            ->postJson('api/payments', [
+                'order_id' => $order->id,
+                'payment_method' => 'credit_card',
+            ]);
 
         // دفع ثاني مرة
         $response = $this->actingAs($user, 'api')
@@ -143,8 +142,6 @@ class OrderPaymentTest extends TestCase
             ]);
 
         $response->assertStatus(403)
-                 ->assertJson(['message' => 'Order has already been paid.']);
+            ->assertJson(['message' => 'Order has already been paid.']);
     }
-
-
 }

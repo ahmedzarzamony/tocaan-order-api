@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class OrderItemFactory extends Factory
 {
-
     protected $model = OrderItem::class;
 
     /**

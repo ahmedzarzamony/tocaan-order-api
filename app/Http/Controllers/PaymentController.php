@@ -2,25 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\Payment;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Requests\PayOrderRequest;
 use App\Http\Resources\PaymentResource;
-use Illuminate\Support\Facades\Response;
+use App\Models\Order;
+use App\Models\Payment;
 use App\Services\Payment\PaymentGatewayFactory;
 use App\Services\Payment\PaymentGatewayInterface;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 
 class PaymentController extends Controller
 {
     public function listPayments(Request $request)
     {
         $payments = Payment::with('order')
-        ->when($request->filled('order_id'), function ($query) use ($request) {
-            $query->where('order_id', $request->order_id);
-        })->paginate(10);
+            ->when($request->filled('order_id'), function ($query) use ($request) {
+                $query->where('order_id', $request->order_id);
+            })->paginate(10);
 
         return PaymentResource::collection($payments);
     }
@@ -34,20 +33,20 @@ class PaymentController extends Controller
 
         if ($lastPayment && $lastPayment->status === 'successful') {
             return response()->json([
-                'message' => 'Order has already been paid.'
+                'message' => 'Order has already been paid.',
             ], 403);
         }
 
         if ($order->status !== 'pending') {
             return response()->json([
-                'message' => 'Payments can only be processed for confirmed orders.'
+                'message' => 'Payments can only be processed for confirmed orders.',
             ], 403);
         }
 
         $gateway = PaymentGatewayFactory::make($request->payment_method);
-        if($gateway instanceof PaymentGatewayInterface === false) {
+        if ($gateway instanceof PaymentGatewayInterface === false) {
             return response()->json([
-                'message' => 'Unsupported payment method.'
+                'message' => 'Unsupported payment method.',
             ], 403);
         }
 
@@ -66,7 +65,7 @@ class PaymentController extends Controller
             $payment->save();
 
             if ($success) {
-                $order->status = 'confirmed'; 
+                $order->status = 'confirmed';
                 $order->save();
             }
         });

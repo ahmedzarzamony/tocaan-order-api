@@ -18,7 +18,7 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'status' => $this->status,
-            'total' => (float)$this->total,
+            'total' => (float) $this->total,
             'created_at' => $this->created_at->toDateTimeString(),
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'payments' => PaymentResource::collection($this->whenLoaded('payments')),

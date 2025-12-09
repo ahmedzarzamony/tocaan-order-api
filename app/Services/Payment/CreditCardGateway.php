@@ -7,11 +7,8 @@ use App\Models\Payment;
 class CreditCardGateway implements PaymentGatewayInterface
 {
     public function __construct(
-            protected array $config
-    )
-    {
-
-    }
+        protected array $config
+    ) {}
 
     public function process(Payment $payment): bool
     {

@@ -24,7 +24,7 @@ class PayOrderRequest extends FormRequest
     {
         return [
             'order_id' => 'required|exists:orders,id',
-            'payment_method' => ['required', new ValidGateway()],
+            'payment_method' => ['required', new ValidGateway],
         ];
     }
 }

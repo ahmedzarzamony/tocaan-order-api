@@ -28,7 +28,7 @@ class PaymentFactory extends Factory
     /** حالة دفع ناجحة */
     public function successful(): self
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'successful',
         ]);
     }
@@ -36,7 +36,7 @@ class PaymentFactory extends Factory
     /** حالة دفع فاشلة */
     public function failed(): self
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'failed',
         ]);
     }
@@ -44,7 +44,7 @@ class PaymentFactory extends Factory
     /** حالة دفع معلقة */
     public function pending(): self
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'status' => 'pending',
         ]);
     }

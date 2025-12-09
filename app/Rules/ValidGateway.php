@@ -16,8 +16,8 @@ class ValidGateway implements ValidationRule
     {
         $gateways = array_keys(config('payment.gateways', []));
 
-        if (!in_array($value, $gateways)) {
-            $fail("The selected {$attribute} is invalid. Allowed: " . implode(', ', $gateways),null);
+        if (! in_array($value, $gateways)) {
+            $fail("The selected {$attribute} is invalid. Allowed: ".implode(', ', $gateways), null);
         }
     }
 }

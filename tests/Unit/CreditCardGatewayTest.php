@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Models\Payment;
 use App\Services\Payment\CreditCardGateway;
+use Tests\TestCase;
 
 class CreditCardGatewayTest extends TestCase
 {
@@ -12,12 +12,12 @@ class CreditCardGatewayTest extends TestCase
     {
         $payment = new Payment([
             'amount' => 200,
-            'payment_method' => 'credit_card'
+            'payment_method' => 'credit_card',
         ]);
 
         $gateway = new CreditCardGateway([
             'api_key' => 'test_key',
-            'api_secret' => 'test_secret'
+            'api_secret' => 'test_secret',
         ]);
 
         $response = $gateway->process($payment);

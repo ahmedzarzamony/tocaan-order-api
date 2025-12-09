@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Models\Payment;
 use App\Services\Payment\PaypalGateway;
+use Tests\TestCase;
 
 class PaypalGatewayTest extends TestCase
 {
@@ -12,7 +12,7 @@ class PaypalGatewayTest extends TestCase
     {
         $payment = new Payment([
             'amount' => 150,
-            'payment_method' => 'paypal'
+            'payment_method' => 'paypal',
         ]);
 
         $gateway = new PaypalGateway([

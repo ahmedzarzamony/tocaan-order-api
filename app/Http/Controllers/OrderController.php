@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\OrderRequest;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Requests\OrderRequest;
-use App\Http\Resources\OrderResource;
 use Illuminate\Support\Facades\Response;
-
 
 class OrderController extends Controller
 {
-
     /**
      * Display a listing of the resource.
      */
@@ -25,6 +23,7 @@ class OrderController extends Controller
                 $query->where('status', $request->status);
             })
             ->paginate(10);
+
         return OrderResource::collection($orders);
     }
 
@@ -36,7 +35,7 @@ class OrderController extends Controller
 
         $order = DB::transaction(function () use ($request) {
             $userId = $request->user()->id;
-            $total = collect($request->items)->sum(fn($item) => $item['quantity'] * $item['price']);
+            $total = collect($request->items)->sum(fn ($item) => $item['quantity'] * $item['price']);
             $order = Order::create([
                 'user_id' => $userId,
                 'status' => 'pending',
@@ -49,12 +48,13 @@ class OrderController extends Controller
                     'price' => $item['price'],
                 ]);
             }
+
             return $order->load('items');
         });
 
         return Response::json([
             'message' => 'Order created successfully',
-            'order' => new OrderResource($order)
+            'order' => new OrderResource($order),
         ], 201);
     }
 
@@ -64,6 +64,7 @@ class OrderController extends Controller
     public function show(string $id)
     {
         $order = Order::with('items')->findOrFail($id);
+
         return new OrderResource($order);
     }
 
@@ -75,17 +76,17 @@ class OrderController extends Controller
         $order = Order::with('items')->findOrFail($id);
         if ($order->payments()->exists()) {
             return Response::json([
-                'message' => 'Cannot update order with existing payments.'
+                'message' => 'Cannot update order with existing payments.',
             ], 403);
         }
 
         DB::transaction(function () use ($request, $order) {
 
-            $existingItemIds = $order->items()->pluck('id')->toArray(); 
+            $existingItemIds = $order->items()->pluck('id')->toArray();
             $requestItemIds = collect($request->items)->pluck('id')->filter()->toArray();
-            $itemsToDelete = array_diff($existingItemIds, $requestItemIds); 
-            if (!empty($itemsToDelete)) { 
-                $order->items()->whereIn('id', $itemsToDelete)->delete(); 
+            $itemsToDelete = array_diff($existingItemIds, $requestItemIds);
+            if (! empty($itemsToDelete)) {
+                $order->items()->whereIn('id', $itemsToDelete)->delete();
             }
 
             $newItems = [];
@@ -117,25 +118,21 @@ class OrderController extends Controller
                 }
             }
 
-            if (!empty($newItems)) {
+            if (! empty($newItems)) {
                 $order->items()->createMany($newItems);
             }
 
-            
-            
-            
         });
         $order->load('items');
-        $total = $order->items->sum(fn($i) => $i->quantity * $i->price);
+        $total = $order->items->sum(fn ($i) => $i->quantity * $i->price);
         $order->total = $total;
         $order->save();
-         // refresh the items relationship
+        // refresh the items relationship
 
         return Response::json([
             'message' => 'Order updated successfully',
-            'order' => new OrderResource($order)
+            'order' => new OrderResource($order),
         ], 200);
-
 
     }
 
@@ -147,10 +144,11 @@ class OrderController extends Controller
         $order = Order::findOrFail($id);
         if ($order->payments()->exists()) {
             return Response::json([
-                'message' => 'Cannot delete order with existing payments.'
+                'message' => 'Cannot delete order with existing payments.',
             ], 403);
         }
         $order->delete();
+
         return Response::json(['message' => 'Order deleted successfully'], 200);
     }
 }

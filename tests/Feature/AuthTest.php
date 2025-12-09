@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
@@ -21,7 +20,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                ->assertJsonStructure(['token']);
+            ->assertJsonStructure(['token']);
     }
 
     public function test_login_user()
@@ -34,7 +33,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJsonStructure(['token']);
+            ->assertJsonStructure(['token']);
     }
 
     public function test_logout_user()
@@ -45,13 +44,11 @@ class AuthTest extends TestCase
         $token = auth('api')->login($user);
 
         $response = $this->withHeader('Authorization', "Bearer $token")
-                        ->postJson('api/auth/logout');
+            ->postJson('api/auth/logout');
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'message' => 'Successfully logged out'
-                ]);
+            ->assertJson([
+                'message' => 'Successfully logged out',
+            ]);
     }
-
-
 }

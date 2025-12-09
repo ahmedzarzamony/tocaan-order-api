@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Response;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use App\Http\Requests\Auth\RegisterRequest;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -34,12 +32,13 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(LoginRequest $request) {
-        
+    public function login(LoginRequest $request)
+    {
+
         $credentials = $request->only('email', 'password');
 
         try {
-            if (!$token = JWTAuth::attempt($credentials)) {
+            if (! $token = JWTAuth::attempt($credentials)) {
                 return Response::json(['error' => 'Invalid credentials'], 401);
             }
         } catch (JWTException $e) {
@@ -59,12 +58,12 @@ class AuthController extends Controller
 
             return Response::json([
                 'message' => 'Token refreshed successfully',
-                'token'   => $newToken
+                'token' => $newToken,
             ]);
-            
+
         } catch (\Exception $e) {
             return Response::json([
-                'error' => 'Token is invalid or expired'
+                'error' => 'Token is invalid or expired',
             ], 401);
         }
     }
@@ -79,5 +78,4 @@ class AuthController extends Controller
 
         return Response::json(['message' => 'Successfully logged out']);
     }
-
 }

@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use App\Services\Payment\PaypalGateway;
 use App\Services\Payment\CreditCardGateway;
 use App\Services\Payment\PaymentGatewayFactory;
+use App\Services\Payment\PaypalGateway;
+use Tests\TestCase;
 
 class GatewayFactoryTest extends TestCase
 {
