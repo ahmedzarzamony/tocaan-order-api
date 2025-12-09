@@ -1,59 +1,247 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Order & Payment Management API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel-based RESTful API for managing orders and processing payments using an extensible payment gateway architecture.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- RESTful API design  
+- Authentication using JWT  
+- Order management (create, update, delete, list, calculate total)  
+- Payment processing using pluggable gateways (Strategy Pattern)  
+- Config-based gateway setup through `.env`  
+- Full request validation  
+- API documentation  
+- Unit & Feature tests
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## ⚙️ Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+git clone <REPOSITORY_URL>
+cd project
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Database Setup
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### - Configure .env
 
-### Premium Partners
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=orders_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### - Migrate  
+```bash
+php artisan migrate --seed
+```
+---
 
-## Contributing
+## JWT Authentication Setup
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer require tymon/jwt-auth
+php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+php artisan jwt:secret
+```
 
-## Code of Conduct
+Add to .env (automatically generated):
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+JWT_SECRET=xxxx
+```
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Payment Gateways Configuration
 
-## License
+```bash
+config/payment.php
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+//Set default gateway
+PAYMENT_GATEWAY=credit_card
+```
+
+### Example config:
+```bash
+<?php
+return [
+    'default_gateway' => env('PAYMENT_GATEWAY', 'credit_card'),
+    'gateways' => [
+        'credit_card' => [
+            'class' => App\Services\Payment\CreditCardGateway::class,
+            'api_key' => env('CREDIT_CARD_API_KEY', ''),
+            'api_secret' => env('CREDIT_CARD_API_SECRET', ''),
+        ],
+        'paypal' => [
+            'class' => App\Services\Payment\PaypalGateway::class,
+            'client_id' => env('PAYPAL_CLIENT_ID', ''),
+            'client_secret' => env('PAYPAL_CLIENT_SECRET', ''),
+        ],
+    ],
+];
+
+```
+
+---
+
+## Extensibility (Strategy Pattern)
+The system uses Strategy Pattern to allow adding new payment gateways with minimal changes.
+
+### How to add a new gateway:
+
+#### 1- Create new class implementing the interface:
+```bash
+class StripeGateway implements PaymentGatewayInterface {
+    public function process(Payment $payment): bool {
+        // Stripe logic
+    }
+}
+```
+
+#### Add config in config/payment.php
+```bash
+'stripe' => [
+    'class' => App\Services\Payment\StripeGateway::class,
+    'api_key' => env('STRIPE_KEY'),
+    'api_secret' => env('STRIPE_SECRET'),
+],
+```
+
+ **NOTES:**
+ * This will automatically be added to the valid gateway rules (ValidationRule),
+ * and it will automatically register in the PaymentGatewayFactory.
+
+ 
+✔ No changes required in controller.
+
+✔ No changes in models
+
+✔ Fully scalable design
+
+---
+
+## Authentication Endpoints
+
+| Method | Endpoint       | Description             |
+| ------ | -------------- | ----------------------- |
+| POST   | /auth/login    | Login                   |
+| POST   | /auth/register | register                |
+| POST   | /auth/logout   | logout                |
+| POST   | /auth/refresh-token | Refresh Token                |
+
+
+Use Bearer token for authenticated endpoints:
+```bash
+Authorization: Bearer <token>
+```
+
+## Orders Endpoints
+
+| Method | Endpoint     | Description             |
+| ------ | ------------ | ----------------------- |
+| POST   | /orders      | Create new order        |
+| PUT    | /orders/{id} | Update order            |
+| DELETE | /orders/{id} | Delete order            |
+| GET    | /orders      | List orders (paginated) |
+| GET    | /orders/{id} | Show order              |
+
+
+## Payments Endpoint
+
+| Method | Endpoint       | Description             |
+| ------ | -------------- | ----------------------- |
+| GET    | /payments      | List payments           |
+| POST   | /payments      | pay order               |
+
+---
+
+## 📄 Notes & Assumptions
+
+- Payment gateways are mocked for testing.
+- Validation errors follow standard Laravel format.
+- Standardized JSON responses for all endpoints.
+- Designed to support real external payment integrations in the future.
+
+---
+
+## 🧪 Testing
+
+```bash
+php artisan test
+```
+
+**Included tests:**
+- Feature Tests
+- Create order
+- Update order
+- Delete order
+- Prevent deleting order with payments
+- Payment processing
+- Pending order cannot be paid
+- Authentication tests
+
+**Unit Tests:**
+- Gateway Factory returns correct driver
+- CreditCardGateway / PaypalGateway
+- Order total calculation
+
+---
+
+## Running the Project
+
+```Bash
+php artisan serve
+```
+
+## 📬 Postman Collection
+
+A complete **Postman Collection** is included to help reviewers easily explore and test all API endpoints. The collection contains sample requests, responses, and error cases.
+
+### 📁 Collection Location
+
+The collection file is included in the repository under the `postman/` folder:
+
+
+> ⚠️ Note: The collection already contains all necessary variables (e.g., `url`, `token`) inside it. No separate environment file is needed.
+
+### 📁 Collection Structure
+
+The collection is organized into logical folders:
+
+#### **Auth**
+- Register
+- Login
+- Logout
+- Refresh Token
+
+#### **Orders**
+- Create Order
+- Update Order
+- Delete Order
+- Get Order Details
+- List Orders (with pagination)
+
+#### **Payments**
+- Pay for an Order
+- Get Payments
+
+### 🧪 Included Examples
+
+Each request includes:
+- Body examples (JSON)
+- Headers
+- Authorization (Bearer Token via collection variable)
+- Success response examples
+- Error response examples (e.g., validation errors, unauthorized access)
