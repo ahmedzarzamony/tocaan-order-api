@@ -20,7 +20,7 @@ Laravel-based RESTful API for managing orders and processing payments using an e
 ## ⚙️ Installation
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/ahmedzarzamony/tocaan-order-api.git
 cd project
 composer install
 cp .env.example .env
